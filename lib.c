@@ -1,6 +1,7 @@
 #include "lib.h"
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 
@@ -46,16 +47,17 @@ int S_distantAddress(char *IP_address, int port,
                      struct sockaddr **dist_addr) {
 
     int domain = AF_INET;
-    struct sockaddr_in addr_in;
-    memset((char *)&addr_in, 0, sizeof(addr_in));
-    addr_in.sin_family = domain;
-    addr_in.sin_port = port;
-    if (!inet_aton(IP_address, &addr_in.sin_addr)) {
+    struct sockaddr_in *addr_in = malloc(sizeof(struct sockaddr_in));
+
+    memset((char *)addr_in, 0, sizeof(*addr_in));
+    addr_in->sin_family = domain;
+    addr_in->sin_port = htons(port);
+    if (!inet_aton(IP_address, &addr_in->sin_addr)) {
         printf("Erreur: mauvaise adresse %s\n", IP_address);
         return -1;
     }
 
-    *dist_addr = (struct sockaddr *) &addr_in;
+    *dist_addr = (struct sockaddr *) addr_in;
 
     return 0;
 }
@@ -63,14 +65,25 @@ int S_distantAddress(char *IP_address, int port,
 int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
                      char *msg, int length) {
     socklen_t addrlen = sizeof(*dist_addr);
-    recvfrom(sockfd, msg, length, 0, dist_addr, &addrlen);
-    return 0;
+    int nb = recvfrom(sockfd, msg, length, 0, dist_addr, &addrlen);
+    if (nb < 0)
+        return -1;
+    return nb;
 }
 
 int S_sendMessage (int sockfd, struct sockaddr *dist_addr, 
                    char *msg, int length) {
 
-    sendto(sockfd, msg, length, 0, dist_addr, sizeof(*dist_addr));
+    struct sockaddr_in *addr_in = (struct sockaddr_in *) dist_addr;
+    int nb;
+    printf("Envoi sur %s on %d\n", inet_ntoa(addr_in->sin_addr), addr_in->sin_port); /* DEBUG */
+    
+    nb = sendto(sockfd, msg, length, 0, dist_addr, sizeof(*addr_in));
+    printf("%d\n", nb);
+/*    if ((
+        perror("sendto");
+        return -1;
+        } */
     return 0;
 }
 
