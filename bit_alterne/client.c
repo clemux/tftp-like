@@ -6,6 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
+                int nbytes, uint32_t seq) {
+    struct packet_header *header;
+    header = (struct packet_header *) buffer;
+    header->seq = seq;
+    header->payload_size = nbytes;
+    if (S_sendMessage(sockfd, dist_addr, buffer,
+                      sizeof(*header) + header->payload_size) < 0)
+        exit(SOCK_SENDTO_FAILED);
+    return 1;
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -13,7 +25,7 @@ int main(int argc, char* argv[])
 
     uint8_t *buffer = malloc(PACKET_SIZE * sizeof(uint8_t));
     int sockfd;
-    struct packet_header *header;
+
     FILE *file;
     char *filename;
     int local_port, distant_port;
@@ -26,6 +38,10 @@ int main(int argc, char* argv[])
 
     // calcul md5
     char *md5sum;
+
+    // boucle d'envoi du fichier
+
+    int i;
 
     // Parsing des arguments
     if (argc < 5) {
@@ -80,25 +96,21 @@ int main(int argc, char* argv[])
 
     printf("Sending...\n");
     
-    header = (struct packet_header *) buffer;
-    header->seq = 0;
+
+    i = 0;
     do {
         nbytes = fread(buffer + sizeof(struct packet_header), 1, PAYLOAD_SIZE, file);
         if (nbytes == 0 && !feof(file)) {
             fprintf(stderr, "Erreur de lecture: '%s'", filename);
             exit(FILE_READ_ERROR);
         }            
-            
-        header->payload_size = nbytes;
-        if (S_sendMessage(sockfd, dist_addr, buffer,
-                          sizeof(*header) + header->payload_size) < 0)
-            exit(SOCK_SENDTO_FAILED);
+        send_packet(sockfd, dist_addr, buffer, nbytes, i % 2);
 
-        header->seq++;
+        i++;
 
     } while (nbytes == PAYLOAD_SIZE);
 
-    printf("%d paquets envoyés\n", header->seq - 1);
+    printf("%d paquets envoyés\n", i - 1);
     printf("Attente du md5...\n");
     if ((S_receiveMessage(sockfd, dist_addr, buffer, 33) < 0)) {
         fprintf(stderr, "Réception de la somme md5 échouée\n");
