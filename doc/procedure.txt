@@ -13,6 +13,19 @@ $ dd if=/dev/urandom of=testfile-1024x512 bs=512 count=1024
 transfert de fichier sur canal de fiabilité parfaite
 ----------------------------------------------------
 
+En ipv4 :
+
+ $ ./receiver-udp 4 received_file
+
+ $ ./sender-udp 4 resources/testfile-1024x512  127.0.0.1 30000
+
+En ipv6 : 
+
+ $ ./receiver-udp 6 received_file
+
+ $ ./sender-udp 6 resources/testfile-1024x512  ::1 30000
+
+
 transfert de fichier sur canal bruité, bit alterné
 --------------------------------------------------
 
