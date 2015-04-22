@@ -7,13 +7,37 @@
 #define BUFSIZE 1024
 #define PAYLOAD_SIZE 512
 
-int main()
+int main(int argc, char *argv[])
 {
     struct sockaddr *dist_addr = NULL;
     uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
-    int sockfd = S_openAndBindSocket(30000);
+    int sockfd;
     int nbytes;
+    char *filename;
+    FILE *file;
+    int local_port;
     struct packet_header header;
+
+
+    // Parsing des arguments
+    if (argc < 3) {
+        fprintf(stderr, "Utilisation : %s <filename> <local port>\n", 
+                argv[0]);
+        exit(1);
+    }
+
+    filename = argv[1];
+
+    if ((local_port = strtol(argv[2], NULL, 10)) == 0) {
+        fprintf(stderr, "Port invalide : %s\n", argv[2]);
+        exit(1);
+    }
+
+    if ((file = fopen(filename, "w")) == NULL)
+        perror("fopen");
+
+    if ((sockfd = S_openAndBindSocket(local_port)) < 0)
+        exit(SOCK_BINDING_FAILED);
 
     do {
         nbytes = S_receiveMessage(sockfd, dist_addr, buffer, BUFSIZE);

@@ -7,7 +7,9 @@
 #define SOCK_BINDING_FAILED -127
 #define SOCK_SENDTO_FAILED -126
 #define SOCK_RECV_FAILED -125
-#define ADDRESS_ERROR 64
+#define ADDRESS_ERROR -64
+#define INVALID_PORT_ERROR -32
+
 
 int S_openAndBindSocket(int local_port);
 
@@ -21,6 +23,8 @@ int S_receiveMessage(int sock_fd, struct sockaddr *dest_addr,
 
 int S_sendMessage (int sock_fd, struct sockaddr *dest_addr, 
                    unsigned char *msg, int length);
+
+int string2port(char* s);
 
 
 

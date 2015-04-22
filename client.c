@@ -12,16 +12,50 @@
 int main(int argc, char* argv[])
 {
     struct sockaddr *dist_addr; 
-    if (argc < 1)
-        exit(1);
 
     uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
-    int sockfd = S_openSocket();
+    int sockfd;
     struct packet_header *header;
     FILE *file;
-    char *filename = argv[1];
+    char *filename;
+    int local_port, distant_port;
+    char *distant_host;
 
     int nbytes;
+
+    // Parsing des arguments
+    if (argc < 4) {
+        fprintf(stderr, "Utilisation : %s <filename> <distant host> <distant port> ",
+                argv[0]);
+        fprintf(stderr, "[<local port>]\n");
+        exit(1);
+    }
+
+    filename = argv[1];
+    distant_host = argv[2];
+    if ((distant_port = string2port(argv[3])) <= 0) {
+        fprintf(stderr, "Port invalide: %s\n", argv[3]);
+        exit(INVALID_PORT_ERROR);
+    }
+
+    if (argc > 4) {
+        local_port = string2port(argv[2]);
+
+        if (local_port <= 0) {
+            fprintf(stderr, "Port invalide : %s\n", argv[2]);
+            exit(1);
+        }
+
+        if ((sockfd = S_openAndBindSocket(local_port)) < 0)
+            exit(SOCK_BINDING_FAILED);
+    }
+
+    else {
+        if ((sockfd = S_openSocket()) < 0)
+            exit(SOCK_CREATION_FAILED);
+    }
+  
+
 
     if ((file = fopen(filename, "r")) == NULL) {
         perror("ouverture fichier ");
@@ -29,7 +63,7 @@ int main(int argc, char* argv[])
     }
         
 
-    if (S_distantAddress("127.0.0.1", 30000, &dist_addr) < 0) {
+    if (S_distantAddress(distant_host, distant_port, &dist_addr) < 0) {
         fprintf(stderr, "erreur adresse\n");
         exit(ADDRESS_ERROR);
     }

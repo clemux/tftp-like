@@ -1,5 +1,7 @@
 #include "lib.h"
 #include <arpa/inet.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,3 +89,16 @@ int S_sendMessage (int sockfd, struct sockaddr *dist_addr,
     return 0;
 }
 
+int string2port(char* s) {
+    long int port;
+    char *endptr = NULL;
+    errno = 0;
+    port = strtol(s, &endptr, 10);
+    if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN))
+            || (errno != 0 && port == 0) || (endptr == s)) {
+            perror("strtol");
+            return INVALID_PORT_ERROR;
+    }
+    
+    return port;
+}
