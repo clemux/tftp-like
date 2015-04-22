@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     filename = argv[1];
 
-    if ((local_port = strtol(argv[2], NULL, 10)) == 0) {
+    if ((local_port = string2port(argv[2]) < 0)) {
         fprintf(stderr, "Port invalide : %s\n", argv[2]);
         exit(1);
     }

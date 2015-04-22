@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
     filename = argv[1];
     distant_host = argv[2];
-    if ((distant_port = string2port(argv[3])) <= 0) {
+    if ((distant_port = string2port(argv[3])) < 0) {
         fprintf(stderr, "Port invalide: %s\n", argv[3]);
         exit(INVALID_PORT_ERROR);
     }
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
     if (argc > 4) {
         local_port = string2port(argv[2]);
 
-        if (local_port <= 0) {
+        if (local_port < 0) {
             fprintf(stderr, "Port invalide : %s\n", argv[2]);
             exit(1);
         }

@@ -95,9 +95,13 @@ int string2port(char* s) {
     errno = 0;
     port = strtol(s, &endptr, 10);
     if ((errno == ERANGE && (port == LONG_MAX || port == LONG_MIN))
-            || (errno != 0 && port == 0) || (endptr == s)) {
+        || (errno != 0 && port == 0)) {
             perror("strtol");
             return INVALID_PORT_ERROR;
+    }
+    
+    if (port == 0 || port > USHRT_MAX  || (endptr == s)) {
+        return INVALID_PORT_ERROR;
     }
     
     return port;
