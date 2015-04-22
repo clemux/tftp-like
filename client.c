@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     do {
         nbytes = fread(buffer + sizeof(struct packet_header), 1, PAYLOAD_SIZE, file);
         if (nbytes == 0 && !feof(file)) {
-            fprintf(stderr, "Erreur de lecture: %s", filename);
+            fprintf(stderr, "Erreur de lecture: '%s'", filename);
             exit(FILE_READ_ERROR);
         }            
             
