@@ -6,7 +6,8 @@
 
 #define BUFSIZE 1024
 #define PAYLOAD_SIZE 512
-#define FILE_INPUT_ERROR 255
+#define FILE_READ_ERROR 255
+#define FILE_OPEN_ERROR 254
 
 int main(int argc, char* argv[])
 {
@@ -17,9 +18,16 @@ int main(int argc, char* argv[])
     uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
     int sockfd = S_openSocket();
     struct packet_header *header;
+    FILE *file;
     char *filename = argv[1];
-    FILE *file = fopen(filename, "r");
+
     int nbytes;
+
+    if ((file = fopen(filename, "r")) == NULL) {
+        perror("ouverture fichier ");
+        return FILE_OPEN_ERROR;
+    }
+        
 
     if (S_distantAddress("127.0.0.1", 30000, &dist_addr) < 0)
         printf("erreur adresse\n");
@@ -32,7 +40,7 @@ int main(int argc, char* argv[])
         nbytes = fread(buffer + sizeof(struct packet_header), 1, PAYLOAD_SIZE, file);
         if (nbytes == 0 && !feof(file)) {
             printf("Erreur de lecture: %s", filename);
-            return FILE_INPUT_ERROR;
+            return FILE_READ_ERROR;
         }            
             
         printf("Lu %d du fichier\n", nbytes);
