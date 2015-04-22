@@ -1,0 +1,36 @@
+Exercice 1
+==========
+
+Ok. Modification du prototype : la variable message est de type
+unsigned char *, afin de pouvoir l'utiliser avec mes structures de
+donnée.
+
+Exercice 2
+==========
+
+receiver
+--------
+
+TODO local port en paramètre
+TODO filename en paramètre
+TODO écrire le fichier dans filename
+
+OK : recevoir fichier et detecter fin de transmission
+
+sender
+------
+
+TODO distant_host en paramètre
+TODO distant_port en parametre
+TODO local_port en paramètre
+
+DONE envoyer fichier par bloc de 512
+
+Exercice 3 : Migration vers IPv6
+================================
+
+Exercice 4 : Bit alterné
+========================
+
+Exercice 5 : Go Back N
+======================

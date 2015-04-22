@@ -1,0 +1,20 @@
+creation des fichiers de test
+-----------------------------
+
+Pour avoir un fichier dont le dernier paquet envoyé ne sera pas de
+taille 0:
+
+$ dd if=/dev/urandom of=test-file-1023x515 bs=515 count=1023
+
+Pour avoir un fichier dont le dernier paquet sera de taille 0:
+
+$ dd if=/dev/urandom of=testfile-1024x512 bs=512 count=1024
+
+transfert de fichier sur canal de fiabilité parfaite
+----------------------------------------------------
+
+transfert de fichier sur canal bruité, bit alterné
+--------------------------------------------------
+
+transfert de fichier sur canal bruité, go back n
+------------------------------------------------
