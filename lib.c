@@ -67,20 +67,24 @@ int S_distantAddress(char *IP_address, int port,
 
     if(domain == AF_INET) {
         struct sockaddr_in *addr_in = (struct sockaddr_in *) addr;
-        if (!inet_pton(domain, IP_address, &(addr_in->sin_addr))) {
+        if (!inet_pton(domain, IP_address, &(addr_in->sin_addr.s_addr))) {
             printf("Erreur: mauvaise adresse %s\n", IP_address);
             return -1;
         }
         addr_in->sin_port = htons(port);
+        addr_in->sin_family = domain;
 
     } else if (domain == AF_INET6) {
         struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) addr;
-        if (!inet_pton(domain, IP_address, &(addr_in6->sin6_addr))) {
+
+        if (!inet_pton(domain, IP_address, &(addr_in6->sin6_addr.s6_addr))) {
             printf("Erreur: mauvaise adresse %s\n", IP_address);
             return -1;
         }
 
+
         addr_in6->sin6_port = htons(port);
+        addr_in6->sin6_family = domain;
 
     } else {
         fprintf(stderr, "Domaine %d inconnu\n", domain);
