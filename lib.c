@@ -111,7 +111,7 @@ char* compute_md5(FILE *file) {
     MD5_CTX context;
     uint8_t buf[FILE_BUF_SIZE];
     uint8_t result[16];
-    char *result_str = malloc(33 * sizeof(char));
+    static char result_str[32];
     int i;
 
     MD5_Init(&context);
