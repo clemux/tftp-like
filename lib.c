@@ -111,13 +111,13 @@ char* compute_md5(FILE *file) {
     MD5_CTX context;
     uint8_t buf[FILE_BUF_SIZE];
     uint8_t result[16];
-    static char result_str[32];
+    static char result_str[33];
     int i;
     int nbytes;
 
     MD5_Init(&context);
     fseek(file, 0, SEEK_SET);
-    while ((nbytes = fread(buf, FILE_BUF_SIZE, 1, file)) > 0) {
+    while ((nbytes = fread(buf, 1, FILE_BUF_SIZE, file)) > 0) {
         MD5_Update(&context, buf, nbytes);
     }
 
@@ -126,7 +126,6 @@ char* compute_md5(FILE *file) {
     for (i = 0; i < 16; i++)
         sprintf(result_str+(i*2), "%.2x", result[i]);
     result_str[32] = '\0';
-    printf("------ %s ----\n", result_str);
     return result_str;
 
     
