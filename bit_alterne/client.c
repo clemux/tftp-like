@@ -19,6 +19,26 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
 
 }
 
+int timeout_ack(int sockfd, long seconds) {
+    // 1 si des données ont été reçues, 0 sinon
+    struct timeval timeout;
+    fd_set rfds;
+    int retval;
+    
+    timeout.tv_sec = seconds;
+    timeout.tv_usec = 0;
+
+    FD_ZERO(&rfds);
+    FD_SET(sockfd, &rfds);
+
+    retval = select(1, &rfds, NULL, NULL, &timeout);
+    if (retval == -1)
+        perror("select()");
+    else if (retval)
+        return 1;
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     struct sockaddr *dist_addr;
