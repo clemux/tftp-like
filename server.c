@@ -9,18 +9,26 @@
 #define BUFSIZE 1024
 #define PAYLOAD_SIZE 512
 
+
 int main(int argc, char *argv[])
 {
+
+    // gestion réseau
     struct sockaddr *dist_addr = NULL;
     uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
     int sockfd;
     int nbytes;
-    char *filename;
-    FILE *file;
     int local_port;
     struct packet_header *header;
+
+    // gestion du fichier
+    char *filename;
+    FILE *file;
     struct stat *stat_p = NULL;
     char *input_buf = NULL;
+    
+    // calcul de la somme md5
+    unsigned char *md5sum;
 
 
     // Parsing des arguments
@@ -63,10 +71,20 @@ int main(int argc, char *argv[])
             exit(SOCK_RECV_FAILED);
         
         header = (struct packet_header *)buffer;
-        fwrite(buffer + sizeof(header), header->payload_size, 1, file);
+        fwrite(buffer + sizeof(*header), header->payload_size, 1, file);
     } while (header->payload_size == PAYLOAD_SIZE);
     
     printf("%d paquets reçus\n", header->seq);
+    printf("Calcul du md5...\n");
+    if ((file = fopen(filename, "r")) == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir '%s' en lecture", filename);
+    }
+
+    md5sum = compute_md5(file);
+    printf("%s\n", md5sum);
+
+    S_sendMessage(sockfd, dist_addr, md5sum,
+                  strlen((char*)md5sum) * sizeof(unsigned char));
 
     return 0;
 }

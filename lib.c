@@ -1,8 +1,8 @@
 #include "lib.h"
+#include "md5.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -106,3 +106,28 @@ int string2port(char* s) {
     }
     return port;
 }
+
+char* compute_md5(FILE *file) {
+    MD5_CTX context;
+    uint8_t *buf = NULL;
+    unsigned char *result = malloc(16 * sizeof(unsigned char));
+    char *result_str = malloc(33 * sizeof(char));
+    int i;
+
+    MD5_Init(&context);
+    fseek(file, 0, SEEK_SET);
+    while ((fread(buf, FILE_BUF_SIZE, 1, file)) > 0) {
+        MD5_Update(&context, buf, FILE_BUF_SIZE);
+    }
+
+    MD5_Final(result, &context);
+
+    for (i = 0; i < 16; i++)
+        sprintf(result_str+(i*2), "%.2x", result[i]);
+    result_str[32] = '\0';
+    return result_str;
+
+    
+
+}
+    

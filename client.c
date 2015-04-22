@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
 
     int nbytes;
 
+    int i;
+
     // Parsing des arguments
     if (argc < 4) {
         fprintf(stderr, "Utilisation : %s <filename> <distant host> <distant port> "
@@ -81,14 +83,23 @@ int main(int argc, char* argv[])
             
         header->payload_size = nbytes;
         if (S_sendMessage(sockfd, dist_addr, buffer,
-                          sizeof(header) + header->payload_size) < 0)
+                          sizeof(*header) + header->payload_size) < 0)
             exit(SOCK_SENDTO_FAILED);
 
         header->seq++;
 
     } while (nbytes == PAYLOAD_SIZE);
 
-    printf("%d paquets envoyés\n", header->seq);
+    printf("%d paquets envoyés\n", header->seq - 1);
+    printf("Attente du md5...\n");
+    if ((S_receiveMessage(sockfd, dist_addr, buffer, BUFSIZE) < 0)) {
+        fprintf(stderr, "Réception de la somme md5 échouée\n");
+        exit(1);
+    }
+    printf("Somme MD5 reçue : ");
+    for (i = 0; i < 16; i++)
+        printf("%.2x", buffer[i]);
+    
     
     return 0;
 }
