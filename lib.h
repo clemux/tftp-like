@@ -13,12 +13,12 @@
 #define FILE_BUF_SIZE 4096 // for compute_md5
 
 
-int S_openAndBindSocket(int local_port);
+int S_openAndBindSocket(int local_port, int domain);
 
-int S_openSocket(void);
+int S_openSocket(int domain);
 
 int S_distantAddress(char *IP_address, int port,
-                     struct sockaddr **dest_addr);
+                     struct sockaddr **dest_addr, int domain);
 
 int S_receiveMessage(int sock_fd, struct sockaddr *dest_addr,
                      unsigned char *msg, int length);

@@ -6,23 +6,36 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 
 
 
-int S_openAndBindSocket(int local_port) {
-    int domain = AF_INET;
+int S_openAndBindSocket(int local_port, int domain) {
     int sockfd;
-    struct sockaddr_in sock_addr;
+    struct sockaddr_storage sock_addr;
 
-    if ((sockfd = S_openSocket()) < 0)
+    if ((sockfd = S_openSocket(domain)) < 0)
         return -1;
 
     // préparation de la structure de l'adresse
     memset((char *)&sock_addr, 0, sizeof(sock_addr));
-    sock_addr.sin_family = domain;
-    sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    sock_addr.sin_port = htons(local_port);
+
+    if(domain == AF_INET) {
+        struct sockaddr_in *addr_in = (struct sockaddr_in *) &sock_addr;
+        addr_in->sin_addr.s_addr = htonl(INADDR_ANY);
+        addr_in->sin_port = htons(local_port);
+        addr_in->sin_family = domain;
+    } else if (domain == AF_INET6) {
+        struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) &sock_addr;
+        addr_in6->sin6_addr = in6addr_any;
+        addr_in6->sin6_port = htons(local_port);
+        addr_in6->sin6_family = domain;
+    } else {
+        close(sockfd);
+        return -1;
+    }
+        
 
     // on attache localement le socket au port `local_port`
     if (bind(sockfd, (struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0) { 
@@ -33,9 +46,8 @@ int S_openAndBindSocket(int local_port) {
     return sockfd;
 }
 
-int S_openSocket(void) {
+int S_openSocket(int domain) {
     int sockfd;
-    int domain = AF_INET;
     // création du socket
     if ((sockfd = socket(domain, SOCK_DGRAM , 0)) < 0) {
         perror("Creation du socket ");
@@ -46,27 +58,40 @@ int S_openSocket(void) {
 }
 
 int S_distantAddress(char *IP_address, int port,
-                     struct sockaddr **dist_addr) {
+                     struct sockaddr **dist_addr, int domain) {
 
-    int domain = AF_INET;
-    struct sockaddr_in *addr_in = malloc(sizeof(struct sockaddr_in));
+    struct sockaddr_storage *addr = (struct sockaddr_storage *) *dist_addr;
+    memset((char *)&addr, 0, sizeof(addr));
 
-    memset((char *)addr_in, 0, sizeof(*addr_in));
-    addr_in->sin_family = domain;
-    addr_in->sin_port = htons(port);
-    if (!inet_aton(IP_address, &addr_in->sin_addr)) {
-        printf("Erreur: mauvaise adresse %s\n", IP_address);
+    if(domain == AF_INET) {
+        struct sockaddr_in *addr_in = (struct sockaddr_in *) &addr;
+        if (!inet_pton(domain, IP_address, &addr_in->sin_addr)) {
+            printf("Erreur: mauvaise adresse %s\n", IP_address);
+            return -1;
+        }
+        addr_in->sin_port = htons(port);
+
+    } else if (domain == AF_INET6) {
+        struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) &addr;
+        if (!inet_pton(domain, IP_address, &addr_in6->sin6_addr)) {
+            printf("Erreur: mauvaise adresse %s\n", IP_address);
+            return -1;
+        }
+
+        addr_in6->sin6_port = htons(port);
+
+    } else {
+        fprintf(stderr, "Domaine %d inconnu\n", domain);
         return -1;
     }
-
-    *dist_addr = (struct sockaddr *) addr_in;
 
     return 0;
 }
 
 int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
                      unsigned char *msg, int length) {
-    socklen_t addrlen = sizeof(*dist_addr);
+    struct sockaddr_storage *addr = (struct sockaddr_storage *) dist_addr;
+    socklen_t addrlen = sizeof(*addr);
     int nb = recvfrom(sockfd, msg, length, 0, dist_addr, &addrlen);
     if (nb < 0) {
         perror("recvfrom ");
@@ -78,11 +103,12 @@ int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
 int S_sendMessage (int sockfd, struct sockaddr *dist_addr, 
                    unsigned char *msg, int length) {
 
-    struct sockaddr_in *addr_in = (struct sockaddr_in *) dist_addr;
-    int nb;
+    int nbytes; // nombre d'octets envoyés
+    struct sockaddr_storage *addr = (struct sockaddr_storage *) dist_addr;
+
     
-    nb = sendto(sockfd, msg, length, 0, dist_addr, sizeof(*addr_in));
-    if (nb < 0) {
+    nbytes = sendto(sockfd, msg, length, 0, dist_addr, sizeof(*addr));
+    if (nbytes < 0) {
         perror("sendto");
         return SOCK_SENDTO_FAILED;
     }

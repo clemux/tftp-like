@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     int nbytes;
     int local_port;
     struct packet_header *header;
+    int domain = AF_INET; // ipv4 ou ipv6
 
     // gestion du fichier
     char *filename;
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if ((sockfd = S_openAndBindSocket(local_port)) < 0)
+    if ((sockfd = S_openAndBindSocket(local_port, domain)) < 0)
         exit(SOCK_BINDING_FAILED);
 
     do {

@@ -22,6 +22,9 @@ int main(int argc, char* argv[])
     int local_port, distant_port;
     char *distant_host;
 
+    // ipv4 ou ipv6?
+    int domain = AF_INET;
+
     int nbytes;
 
     // calcul md5
@@ -49,12 +52,12 @@ int main(int argc, char* argv[])
             exit(1);
         }
 
-        if ((sockfd = S_openAndBindSocket(local_port)) < 0)
+        if ((sockfd = S_openAndBindSocket(local_port, domain)) < 0)
             exit(SOCK_BINDING_FAILED);
     }
 
     else {
-        if ((sockfd = S_openSocket()) < 0)
+        if ((sockfd = S_openSocket(domain)) < 0)
             exit(SOCK_CREATION_FAILED);
     }
   
@@ -66,7 +69,7 @@ int main(int argc, char* argv[])
     }
         
 
-    if (S_distantAddress(distant_host, distant_port, &dist_addr) < 0) {
+    if (S_distantAddress(distant_host, distant_port, &dist_addr, domain) < 0) {
         fprintf(stderr, "erreur adresse\n");
         exit(ADDRESS_ERROR);
     }
