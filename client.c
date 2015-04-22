@@ -1,3 +1,4 @@
+#include "client.h"
 #include "lib.h"
 #include "md5.h"
 #include "packet.h"
@@ -5,16 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFSIZE 1024
-#define PAYLOAD_SIZE 512
-#define FILE_READ_ERROR 255
-#define FILE_OPEN_ERROR 254
 
 int main(int argc, char* argv[])
 {
     struct sockaddr *dist_addr;
 
-    uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
+    uint8_t *buffer = malloc(PACKET_SIZE * sizeof(uint8_t));
     int sockfd;
     struct packet_header *header;
     FILE *file;

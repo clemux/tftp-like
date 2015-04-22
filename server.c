@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define BUFSIZE 1024
 #define PAYLOAD_SIZE 512
 
 
@@ -15,7 +14,7 @@ int main(int argc, char *argv[])
 
     // gestion réseau
     struct sockaddr dist_addr;
-    uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
+    uint8_t *buffer = malloc(PACKET_SIZE * sizeof(uint8_t));
     int sockfd;
     int nbytes;
     int local_port;
@@ -67,7 +66,7 @@ int main(int argc, char *argv[])
         exit(SOCK_BINDING_FAILED);
 
     do {
-        nbytes = S_receiveMessage(sockfd, &dist_addr, buffer, BUFSIZE);
+        nbytes = S_receiveMessage(sockfd, &dist_addr, buffer, PACKET_SIZE);
         if (nbytes < 0)
             exit(SOCK_RECV_FAILED);
         
@@ -85,7 +84,7 @@ int main(int argc, char *argv[])
     md5sum = compute_md5(file);
     printf("%s\n", md5sum);
 
-    S_sendMessage(sockfd, &dist_addr, md5sum,
+    S_sendMessage(sockfd, &dist_addr, (unsigned char *) md5sum,
                   strlen(md5sum) * sizeof(unsigned char) + 1);
 
     return 0;
