@@ -63,7 +63,7 @@ int S_distantAddress(char *IP_address, int port,
     struct sockaddr_storage *addr = malloc(sizeof(struct sockaddr_storage));
     *dist_addr = (struct sockaddr *) addr;
 
-    memset((char *)&addr, 0, sizeof(*addr));
+    memset((char *)addr, 0, sizeof(*addr));
 
     if(domain == AF_INET) {
         struct sockaddr_in *addr_in = (struct sockaddr_in *) addr;
