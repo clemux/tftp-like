@@ -63,7 +63,7 @@ int S_distantAddress(char *IP_address, int port,
 }
 
 int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
-                     char *msg, int length) {
+                     unsigned char *msg, int length) {
     socklen_t addrlen = sizeof(*dist_addr);
     int nb = recvfrom(sockfd, msg, length, 0, dist_addr, &addrlen);
     if (nb < 0)
@@ -72,18 +72,16 @@ int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
 }
 
 int S_sendMessage (int sockfd, struct sockaddr *dist_addr, 
-                   char *msg, int length) {
+                   unsigned char *msg, int length) {
 
     struct sockaddr_in *addr_in = (struct sockaddr_in *) dist_addr;
     int nb;
-    printf("Envoi sur %s on %d\n", inet_ntoa(addr_in->sin_addr), addr_in->sin_port); /* DEBUG */
     
     nb = sendto(sockfd, msg, length, 0, dist_addr, sizeof(*addr_in));
-    printf("%d\n", nb);
-/*    if ((
+    if (nb < 0) {
         perror("sendto");
         return -1;
-        } */
+    }
     return 0;
 }
 

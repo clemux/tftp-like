@@ -14,10 +14,10 @@ int S_distantAddress(char *IP_address, int port,
                      struct sockaddr **dest_addr);
 
 int S_receiveMessage(int sock_fd, struct sockaddr *dest_addr,
-                     char *msg, int length);
+                     unsigned char *msg, int length);
 
 int S_sendMessage (int sock_fd, struct sockaddr *dest_addr, 
-                   char *msg, int length);
+                   unsigned char *msg, int length);
 
 
 
