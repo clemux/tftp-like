@@ -109,8 +109,8 @@ int string2port(char* s) {
 
 char* compute_md5(FILE *file) {
     MD5_CTX context;
-    uint8_t *buf = NULL;
-    unsigned char *result = malloc(16 * sizeof(unsigned char));
+    uint8_t buf[FILE_BUF_SIZE];
+    uint8_t result[16];
     char *result_str = malloc(33 * sizeof(char));
     int i;
 
