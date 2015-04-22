@@ -28,24 +28,30 @@ int main(int argc, char* argv[])
     char *md5sum;
 
     // Parsing des arguments
-    if (argc < 4) {
-        fprintf(stderr, "Utilisation : %s <filename> <distant host> <distant port> "
+    if (argc < 5) {
+        fprintf(stderr, "Utilisation : %s <version IP> <filename> <distant host> <distant port> "
                 "[<local port>]\n", argv[0]);
         exit(1);
     }
-
-    filename = argv[1];
-    distant_host = argv[2];
-    if ((distant_port = string2port(argv[3])) < 0) {
-        fprintf(stderr, "Port invalide: %s\n", argv[3]);
+    
+    if (argv[1][0] == '4') {
+        domain = AF_INET;
+    } else if (argv[1][0] ==  '6') {
+        domain = AF_INET6;
+    }
+    
+    filename = argv[2];
+    distant_host = argv[3];
+    if ((distant_port = string2port(argv[4])) < 0) {
+        fprintf(stderr, "Port invalide: %s\n", argv[4]);
         exit(INVALID_PORT_ERROR);
     }
 
-    if (argc > 4) {
-        local_port = string2port(argv[2]);
+    if (argc > 5) {
+        local_port = string2port(argv[5]);
 
         if (local_port < 0) {
-            fprintf(stderr, "Port invalide : %s\n", argv[2]);
+            fprintf(stderr, "Port invalide : %s\n", argv[5]);
             exit(1);
         }
 

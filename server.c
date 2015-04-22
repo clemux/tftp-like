@@ -32,16 +32,23 @@ int main(int argc, char *argv[])
 
 
     // Parsing des arguments
-    if (argc < 3) {
-        fprintf(stderr, "Utilisation : %s <filename> <local port>\n", 
+    if (argc < 4) {
+        fprintf(stderr, "Utilisation : %s <version ip> <filename> <local port>\n", 
                 argv[0]);
         exit(1);
     }
 
-    filename = argv[1];
+    if (argv[1][0] == '4') {
+        domain = AF_INET;
+    } else if (argv[1][0] ==  '6') {
+        domain = AF_INET6;
+    }
 
-    if ((local_port = string2port(argv[2])) < 0) {
-        fprintf(stderr, "Port invalide : '%s'\n", argv[2]);
+
+    filename = argv[2];
+
+    if ((local_port = string2port(argv[3])) < 0) {
+        fprintf(stderr, "Port invalide : '%s'\n", argv[3]);
         exit(1);
     }
    
