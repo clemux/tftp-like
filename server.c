@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     printf("Écoute sur le port %d...\n", (int)local_port);
 
     if ((stat(filename, stat_p)) == 0) {
-        printf("Le fichier %s exist. Continuer? (Y/n) ", filename);
+        printf("Le fichier %s existe. Continuer? (Y/n) ", filename);
         read(0, input_buf, 1);
         if (input_buf[0] == 'n' || input_buf[0] == 'N') {
             printf("Ok, on annule tout.\n");

@@ -80,7 +80,6 @@ int main(int argc, char* argv[])
             exit(FILE_READ_ERROR);
         }            
             
-        printf("Lu %d du fichier\n", nbytes);
         header->payload_size = nbytes;
         if (S_sendMessage(sockfd, dist_addr, buffer,
                           sizeof(header) + header->payload_size) < 0)
