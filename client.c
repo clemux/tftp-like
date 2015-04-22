@@ -1,4 +1,5 @@
 #include "lib.h"
+#include "md5.h"
 #include "packet.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +24,8 @@ int main(int argc, char* argv[])
 
     int nbytes;
 
-    int i;
+    // calcul md5
+    char *md5sum;
 
     // Parsing des arguments
     if (argc < 4) {
@@ -92,13 +94,21 @@ int main(int argc, char* argv[])
 
     printf("%d paquets envoyés\n", header->seq - 1);
     printf("Attente du md5...\n");
-    if ((S_receiveMessage(sockfd, dist_addr, buffer, BUFSIZE) < 0)) {
+    if ((S_receiveMessage(sockfd, dist_addr, buffer, 33) < 0)) {
         fprintf(stderr, "Réception de la somme md5 échouée\n");
         exit(1);
     }
-    printf("Somme MD5 reçue : ");
-    for (i = 0; i < 16; i++)
-        printf("%.2x", buffer[i]);
+    printf("Somme MD5 reçue : %s\n", buffer);
+
+    printf("Calcul du MD5 local...\n");
+
+    md5sum = compute_md5(file);
+    printf("MD5 local : %s\n", md5sum);
+
+    if (strcmp((char*) md5sum, (char*) buffer) == 0)
+        printf("MD5 OK !\n");
+    else
+        printf("MD5 différent... erreur de transmission !\n");
     
     
     return 0;
