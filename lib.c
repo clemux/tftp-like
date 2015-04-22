@@ -104,5 +104,5 @@ int string2port(char* s) {
     if (port == 0 || port > USHRT_MAX  || (endptr == s)) {
         return INVALID_PORT_ERROR;
     }
-    return (int) port;
+    return port;
 }
