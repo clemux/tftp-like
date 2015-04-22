@@ -12,7 +12,7 @@
 
 int main(int argc, char* argv[])
 {
-    struct sockaddr *dist_addr; 
+    struct sockaddr *dist_addr;
 
     uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
     int sockfd;

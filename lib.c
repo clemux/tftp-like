@@ -60,20 +60,22 @@ int S_openSocket(int domain) {
 int S_distantAddress(char *IP_address, int port,
                      struct sockaddr **dist_addr, int domain) {
 
-    struct sockaddr_storage *addr = (struct sockaddr_storage *) *dist_addr;
-    memset((char *)&addr, 0, sizeof(addr));
+    struct sockaddr_storage *addr = malloc(sizeof(struct sockaddr_storage));
+    *dist_addr = (struct sockaddr *) addr;
+
+    memset((char *)&addr, 0, sizeof(*addr));
 
     if(domain == AF_INET) {
-        struct sockaddr_in *addr_in = (struct sockaddr_in *) &addr;
-        if (!inet_pton(domain, IP_address, &addr_in->sin_addr)) {
+        struct sockaddr_in *addr_in = (struct sockaddr_in *) addr;
+        if (!inet_pton(domain, IP_address, &(addr_in->sin_addr))) {
             printf("Erreur: mauvaise adresse %s\n", IP_address);
             return -1;
         }
         addr_in->sin_port = htons(port);
 
     } else if (domain == AF_INET6) {
-        struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) &addr;
-        if (!inet_pton(domain, IP_address, &addr_in6->sin6_addr)) {
+        struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *) addr;
+        if (!inet_pton(domain, IP_address, &(addr_in6->sin6_addr))) {
             printf("Erreur: mauvaise adresse %s\n", IP_address);
             return -1;
         }
