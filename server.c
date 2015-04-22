@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     char *input_buf = NULL;
     
     // calcul de la somme md5
-    unsigned char *md5sum;
+    char *md5sum;
 
 
     // Parsing des arguments
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
     
     printf("%d paquets reçus\n", header->seq);
     printf("Calcul du md5...\n");
+    fclose(file);
     if ((file = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Impossible d'ouvrir '%s' en lecture", filename);
     }

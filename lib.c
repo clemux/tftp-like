@@ -126,6 +126,7 @@ char* compute_md5(FILE *file) {
     for (i = 0; i < 16; i++)
         sprintf(result_str+(i*2), "%.2x", result[i]);
     result_str[32] = '\0';
+    printf("------ %s ----\n", result_str);
     return result_str;
 
     
