@@ -89,6 +89,7 @@ int S_sendMessage (int sockfd, struct sockaddr *dist_addr,
     return 0;
 }
 
+// On pourrait utiliser atoi, puisque le port 0 est invalide...
 int string2port(char* s) {
     long int port;
     char *endptr = NULL;
@@ -103,6 +104,5 @@ int string2port(char* s) {
     if (port == 0 || port > USHRT_MAX  || (endptr == s)) {
         return INVALID_PORT_ERROR;
     }
-    
-    return port;
+    return (int) port;
 }
