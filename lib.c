@@ -113,11 +113,12 @@ char* compute_md5(FILE *file) {
     uint8_t result[16];
     static char result_str[32];
     int i;
+    int nbytes;
 
     MD5_Init(&context);
     fseek(file, 0, SEEK_SET);
-    while ((fread(buf, FILE_BUF_SIZE, 1, file)) > 0) {
-        MD5_Update(&context, buf, FILE_BUF_SIZE);
+    while ((nbytes = fread(buf, FILE_BUF_SIZE, 1, file)) > 0) {
+        MD5_Update(&context, buf, nbytes);
     }
 
     MD5_Final(result, &context);
