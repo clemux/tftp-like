@@ -25,9 +25,8 @@ int main(int argc, char* argv[])
 
     // Parsing des arguments
     if (argc < 4) {
-        fprintf(stderr, "Utilisation : %s <filename> <distant host> <distant port> ",
-                argv[0]);
-        fprintf(stderr, "[<local port>]\n");
+        fprintf(stderr, "Utilisation : %s <filename> <distant host> <distant port> "
+                "[<local port>]\n", argv[0]);
         exit(1);
     }
 
