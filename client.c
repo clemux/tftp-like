@@ -6,15 +6,19 @@
 
 #define BUFSIZE 1024
 #define PAYLOAD_SIZE 512
+#define FILE_INPUT_ERROR 255
 
-int main()
+int main(int argc, char* argv[])
 {
     struct sockaddr *dist_addr; 
+    if (argc < 1)
+        return 1;
+
     uint8_t *buffer = malloc(BUFSIZE * sizeof(uint8_t));
     int sockfd = S_openSocket();
-    uint8_t *payload = malloc(PAYLOAD_SIZE * sizeof(uint8_t));
-    struct packet_header header;
-    FILE *file = fopen("chat-peau.jpg", "r");
+    struct packet_header *header;
+    char *filename = argv[1];
+    FILE *file = fopen(filename, "r");
     int nbytes;
 
     if (S_distantAddress("127.0.0.1", 30000, &dist_addr) < 0)
@@ -22,24 +26,22 @@ int main()
 
     printf("Sending...\n");
     
-    /* préparation d'un paquet */
-
-    header.seq = 0;
-    while (1) {
-        header.seq++;
-        nbytes = fread(payload, PAYLOAD_SIZE, 1, file);
-        printf("Lu %d du fichier\n", nbytes * PAYLOAD_SIZE);
-        header.payload_size = nbytes * PAYLOAD_SIZE;
-        memcpy(buffer, &header, sizeof(header));
-        memcpy(buffer + sizeof(header), payload, sizeof(*payload));
-
-
+    header = (struct packet_header *) buffer;
+    header->seq = 0;
+    do {
+        nbytes = fread(buffer + sizeof(struct packet_header), 1, PAYLOAD_SIZE, file);
+        if (nbytes == 0 && !feof(file)) {
+            printf("Erreur de lecture: %s", filename);
+            return FILE_INPUT_ERROR;
+        }            
+            
+        printf("Lu %d du fichier\n", nbytes);
+        header->payload_size = nbytes;
         S_sendMessage(sockfd, dist_addr, buffer,
-                      sizeof(header) + header.payload_size);
-        if (nbytes == 0) {
-            break;
-        }
-    }
+                      sizeof(header) + header->payload_size);
+        header->seq++;
+
+    } while (nbytes == PAYLOAD_SIZE);
     
     return 0;
 }
