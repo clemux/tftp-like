@@ -66,8 +66,10 @@ int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
                      unsigned char *msg, int length) {
     socklen_t addrlen = sizeof(*dist_addr);
     int nb = recvfrom(sockfd, msg, length, 0, dist_addr, &addrlen);
-    if (nb < 0)
-        return -1;
+    if (nb < 0) {
+        perror("recvfrom ");
+        return SOCK_RECV_FAILED;
+    }
     return nb;
 }
 
@@ -80,7 +82,7 @@ int S_sendMessage (int sockfd, struct sockaddr *dist_addr,
     nb = sendto(sockfd, msg, length, 0, dist_addr, sizeof(*addr_in));
     if (nb < 0) {
         perror("sendto");
-        return -1;
+        return SOCK_SENDTO_FAILED;
     }
     return 0;
 }

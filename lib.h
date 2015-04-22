@@ -3,8 +3,11 @@
 
 #include <sys/socket.h>
 
-#define SOCK_CREATION_FAILED -1
-#define SOCK_BINDING_FAILED -2
+#define SOCK_CREATION_FAILED -128
+#define SOCK_BINDING_FAILED -127
+#define SOCK_SENDTO_FAILED -126
+#define SOCK_RECV_FAILED -125
+#define ADDRESS_ERROR 64
 
 int S_openAndBindSocket(int local_port);
 

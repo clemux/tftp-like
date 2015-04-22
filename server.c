@@ -14,20 +14,19 @@ int main()
     int sockfd = S_openAndBindSocket(30000);
     int nbytes;
     struct packet_header header;
-    
 
-    while (1) {
+    do {
         nbytes = S_receiveMessage(sockfd, dist_addr, buffer, BUFSIZE);
+        if (nbytes < 0)
+            exit(SOCK_RECV_FAILED);
+        
         memcpy(&header.seq, buffer, sizeof(header.seq));
-        buffer += sizeof(header.seq);
-        memcpy(&header.payload_size, buffer, sizeof(header.payload_size));
-        buffer += sizeof(header.payload_size);
+        memcpy(&header.payload_size, buffer + sizeof(header.seq),
+               sizeof(header.payload_size));
         printf("Reçu: %d bytes\n", nbytes);
-        printf("Paquet %d reçu: %d octets\n", header.seq, header.payload_size);
-        if (header.payload_size < PAYLOAD_SIZE) {
-            printf("Fin de la transmission\n");
-            break;
-        }
-    }
+        printf("Paquet %d reçu: %d octets\n", header.seq,
+               header.payload_size);
+    } while (header.payload_size == PAYLOAD_SIZE);
+
     return 0;
 }
