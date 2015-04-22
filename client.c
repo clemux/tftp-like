@@ -89,6 +89,8 @@ int main(int argc, char* argv[])
         header->seq++;
 
     } while (nbytes == PAYLOAD_SIZE);
+
+    printf("%d paquets envoyés\n", header->seq);
     
     return 0;
 }

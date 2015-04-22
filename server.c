@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     char *filename;
     FILE *file;
     int local_port;
-    struct packet_header header;
+    struct packet_header *header;
     struct stat *stat_p = NULL;
     char *input_buf = NULL;
 
@@ -62,14 +62,11 @@ int main(int argc, char *argv[])
         if (nbytes < 0)
             exit(SOCK_RECV_FAILED);
         
-        memcpy(&header.seq, buffer, sizeof(header.seq));
-        memcpy(&header.payload_size, buffer + sizeof(header.seq),
-               sizeof(header.payload_size));
-        printf("Reçu: %d bytes\n", nbytes);
-        printf("Paquet %d reçu: %d octets\n", header.seq,
-               header.payload_size);
-        fwrite(buffer + sizeof(header), header.payload_size, 1, file);
-    } while (header.payload_size == PAYLOAD_SIZE);
+        header = (struct packet_header *)buffer;
+        fwrite(buffer + sizeof(header), header->payload_size, 1, file);
+    } while (header->payload_size == PAYLOAD_SIZE);
+    
+    printf("%d paquets reçus\n", header->seq);
 
     return 0;
 }
