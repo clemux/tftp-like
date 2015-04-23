@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
         i++;
     } while (header->payload_size == PAYLOAD_SIZE);
     
-    printf("%d paquets reçus\n", i -1);
+    printf("%d paquets reçus\n", i - 1);
     fclose(file);
     if ((file = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Impossible d'ouvrir '%s' en lecture", filename);
