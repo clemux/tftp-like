@@ -1,12 +1,24 @@
 #include "lib.h"
 #include "packet.h"
+#include "server.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define PAYLOAD_SIZE 512
+
+int send_ack(int sockfd, struct sockaddr *addr, uint32_t seq) {
+    struct packet_header header;
+    header.seq = seq;
+    header.payload_size = 0;
+    printf("Envoi de ACK%d\n", seq);
+    if (S_sendMessage(sockfd, addr, &header, sizeof(header)) < 0) {
+        fprintf(stderr, "Erreur envoi de l'acquittement\n");
+        return -1;
+    }
+    return 0;
+}
 
 
 int main(int argc, char *argv[])
@@ -77,8 +89,12 @@ int main(int argc, char *argv[])
         if (nbytes < 0)
             exit(SOCK_RECV_FAILED);
         
-        header = (struct packet_header *)buffer;
+        header = (struct packet_header *) buffer;
+        printf("Reçu paquet : %d\n", header->seq);
         fwrite(buffer + sizeof(*header), header->payload_size, 1, file);
+        
+        if (send_ack(sockfd, &dist_addr, header->seq) < 0)
+            exit(1);
     } while (header->payload_size == PAYLOAD_SIZE);
     
     printf("%d paquets reçus\n", header->seq);

@@ -95,7 +95,7 @@ int S_distantAddress(char *IP_address, int port,
 }
 
 int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
-                     unsigned char *msg, int length) {
+                     void *msg, int length) {
     struct sockaddr_storage *addr = (struct sockaddr_storage *) dist_addr;
     socklen_t addrlen = sizeof(*addr);
     int nb = recvfrom(sockfd, msg, length, 0, dist_addr, &addrlen);
@@ -107,7 +107,7 @@ int S_receiveMessage(int sockfd, struct sockaddr *dist_addr,
 }
 
 int S_sendMessage (int sockfd, struct sockaddr *dist_addr, 
-                   unsigned char *msg, int length) {
+                   void *msg, int length) {
 
     int nbytes; // nombre d'octets envoyés
     struct sockaddr_storage *addr = (struct sockaddr_storage *) dist_addr;
@@ -117,6 +117,8 @@ int S_sendMessage (int sockfd, struct sockaddr *dist_addr,
     if (nbytes < 0) {
         perror("sendto");
         return SOCK_SENDTO_FAILED;
+    } else {
+        printf("Envoyé %d bytes\n", nbytes);
     }
     return 0;
 }

@@ -29,8 +29,14 @@ DONE envoyer fichier par bloc de 512
 Exercice 3 : Migration vers IPv6
 ================================
 
+Ça fonctionne bien, le premier argument de chaque programme doit-être
+"4" ou "6", pour choisir ipv4 et ipv6. Si autre chose que 4 ou 6, on
+continuant en supposant que l'adresse donnée est une adresse ipv4.
+
 Exercice 4 : Bit alterné
 ========================
+
+Ça fonctionne bien, en ipv6 autant qu'en ipv4.
 
 Exercice 5 : Go Back N
 ======================

@@ -2,9 +2,14 @@
 #include "lib.h"
 #include "md5.h"
 #include "packet.h"
+#include <fcntl.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+
 
 int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
                 int nbytes, uint32_t seq) {
@@ -21,27 +26,27 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
 
 int timeout_ack(int sockfd, long seconds) {
     // 1 si des données ont été reçues, 0 sinon
-    struct timeval timeout;
-    fd_set rfds;
+    struct pollfd fd;
     int retval;
-    
-    timeout.tv_sec = seconds;
-    timeout.tv_usec = 0;
 
-    FD_ZERO(&rfds);
-    FD_SET(sockfd, &rfds);
+    fd.fd = sockfd;
+    fd.events = POLLIN;
 
-    retval = select(1, &rfds, NULL, NULL, &timeout);
+    retval = poll(&fd, 1, seconds * 1000);
+    printf("En attente d'un ACK...\n");
+
     if (retval == -1)
-        perror("select()");
-    else if (retval)
+        perror("poll ");
+    else if (retval) {
         return 1;
+    }
+
     return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    struct sockaddr *dist_addr;
+    struct sockaddr *dist_addr = malloc(sizeof(struct sockaddr));
 
     uint8_t *buffer = malloc(PACKET_SIZE * sizeof(uint8_t));
     int sockfd;
@@ -60,8 +65,9 @@ int main(int argc, char* argv[])
     char *md5sum;
 
     // boucle d'envoi du fichier
-
-    int i;
+    struct packet_header *ack_header = malloc(sizeof(struct packet_header));
+    int i; // compteur d'envoi de paquets
+    int received_data; // 1 si donnéès reçues
 
     // Parsing des arguments
     if (argc < 5) {
@@ -100,6 +106,11 @@ int main(int argc, char* argv[])
             exit(SOCK_CREATION_FAILED);
     }
   
+    // socket non bloquant
+//    if (fcntl(sockfd, F_SETFL, O_NONBLOCK) < 0) {
+//        perror("passer socket en non blockant : ");
+//        exit(1);
+//    }
 
 
     if ((file = fopen(filename, "r")) == NULL) {
@@ -119,12 +130,29 @@ int main(int argc, char* argv[])
 
     i = 0;
     do {
+        int acked = 0;
         nbytes = fread(buffer + sizeof(struct packet_header), 1, PAYLOAD_SIZE, file);
         if (nbytes == 0 && !feof(file)) {
             fprintf(stderr, "Erreur de lecture: '%s'", filename);
             exit(FILE_READ_ERROR);
         }            
-        send_packet(sockfd, dist_addr, buffer, nbytes, i % 2);
+        while (!acked) {
+            uint32_t seq = i % 2; // numero de sequence binaire
+
+            send_packet(sockfd, dist_addr, buffer, nbytes, seq);
+            received_data = timeout_ack(sockfd, TIMEOUT); // on attend un ACK
+
+            if (received_data) {
+                if ((S_receiveMessage(sockfd, dist_addr, ack_header,
+                                      sizeof(struct packet_header)) < 0)) {
+                    fprintf(stderr, "%d: réception ack échouée\n", i);
+                    exit(1);
+                }
+
+                if (ack_header->seq == seq)
+                    acked = 1;
+            }
+        }
 
         i++;
 

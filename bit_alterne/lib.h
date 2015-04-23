@@ -21,10 +21,10 @@ int S_distantAddress(char *IP_address, int port,
                      struct sockaddr **dest_addr, int domain);
 
 int S_receiveMessage(int sock_fd, struct sockaddr *dest_addr,
-                     unsigned char *msg, int length);
+                     void *msg, int length);
 
 int S_sendMessage (int sock_fd, struct sockaddr *dest_addr, 
-                   unsigned char *msg, int length);
+                   void *msg, int length);
 
 int string2port(char* s);
 
