@@ -26,7 +26,15 @@ continuant en supposant que l'adresse donnée est une adresse ipv4.
 Exercice 4 : Bit alterné
 ========================
 
-Ça semble fonctionner, en ipv4 comme en ipv6.
+Ça semble fonctionner, en ipv4 comme en ipv6. Je ne suis pas sûr que
+ça fonctionne correctement avec le medium donné.
+
+J'ai réussi à faire plusieurs transferts à la suite (avec un taux
+d'erreur de 0.3) qui se passaient sans encombre, de ma connexion adsl
+vers un serveur dédié Online... puis je n'ai plus réussi.
+
+La vérification de somme md5 à la fin de la transmission permet de
+vérifier cela.
 
 Exercice 5 : Go Back N
 ======================
