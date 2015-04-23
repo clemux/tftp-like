@@ -3,46 +3,12 @@
 #include "md5.h"
 #include "packet.h"
 #include <fcntl.h>
-#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 
-
-int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
-                int nbytes, uint32_t seq) {
-    struct packet_header *header;
-    header = (struct packet_header *) buffer;
-    header->seq = seq;
-    header->payload_size = nbytes;
-    if (S_sendMessage(sockfd, dist_addr, buffer,
-                      sizeof(*header) + header->payload_size) < 0)
-        exit(SOCK_SENDTO_FAILED);
-    return 1;
-
-}
-
-int timeout_ack(int sockfd, long seconds) {
-    // 1 si des données ont été reçues, 0 sinon
-    struct pollfd fd;
-    int retval;
-
-    fd.fd = sockfd;
-    fd.events = POLLIN;
-
-    retval = poll(&fd, 1, seconds * 1000);
-    printf("En attente d'un ACK...\n");
-
-    if (retval == -1)
-        perror("poll ");
-    else if (retval) {
-        return 1;
-    }
-
-    return 0;
-}
 
 int main(int argc, char* argv[])
 {
@@ -62,12 +28,12 @@ int main(int argc, char* argv[])
     int nbytes;
 
     // calcul md5
-    char *md5sum;
+    char *md5sum_local;
+    char md5sum_remote[33];
 
     // boucle d'envoi du fichier
-    struct packet_header *ack_header = malloc(sizeof(struct packet_header));
+
     int i; // compteur d'envoi de paquets
-    int received_data; // 1 si donnéès reçues
 
     // Parsing des arguments
     if (argc < 5) {
@@ -130,28 +96,14 @@ int main(int argc, char* argv[])
 
     i = 0;
     do {
-        int acked = 0;
         nbytes = fread(buffer + sizeof(struct packet_header), 1, PAYLOAD_SIZE, file);
         if (nbytes == 0 && !feof(file)) {
             fprintf(stderr, "Erreur de lecture: '%s'", filename);
             exit(FILE_READ_ERROR);
         }            
-        while (!acked) {
-            uint32_t seq = i % 2; // numero de sequence binaire
-
-            send_packet(sockfd, dist_addr, buffer, nbytes, seq);
-            received_data = timeout_ack(sockfd, TIMEOUT); // on attend un ACK
-
-            if (received_data) {
-                if ((S_receiveMessage(sockfd, dist_addr, ack_header,
-                                      sizeof(struct packet_header)) < 0)) {
-                    fprintf(stderr, "%d: réception ack échouée\n", i);
-                    exit(1);
-                }
-
-                if (ack_header->seq == seq)
-                    acked = 1;
-            }
+        if (!send_packet(sockfd, dist_addr, buffer, nbytes, i % 2)) {
+            printf("Envoi du paquet %d échoué\n", i);
+            break;
         }
 
         i++;
@@ -160,18 +112,21 @@ int main(int argc, char* argv[])
 
     printf("%d paquets envoyés\n", i - 1);
     printf("Attente du md5...\n");
-    if ((S_receiveMessage(sockfd, dist_addr, buffer, 33) < 0)) {
+    if ((S_receiveMessage(sockfd, dist_addr, buffer, sizeof(struct packet_header) + 33) < 0)) {
         fprintf(stderr, "Réception de la somme md5 échouée\n");
         exit(1);
     }
+
+    // somme md5 : 32 octets ASCII + '\0' de fin de chaine
+    memcpy(md5sum_remote, buffer + sizeof(struct packet_header), 33);
     printf("Somme MD5 reçue : %s\n", buffer);
 
     printf("Calcul du MD5 local...\n");
 
-    md5sum = compute_md5(file);
-    printf("MD5 local : %s\n", md5sum);
+    md5sum_local = compute_md5(file);
+    printf("MD5 local : %s\n", md5sum_local);
 
-    if (strcmp((char*) md5sum, (char*) buffer) == 0)
+    if (strcmp(md5sum_local, md5sum_remote) == 0)
         printf("MD5 OK !\n");
     else
         printf("MD5 différent... erreur de transmission !\n");

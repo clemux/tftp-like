@@ -1,8 +1,10 @@
 #include "lib.h"
 #include "md5.h"
+#include "packet.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
+#include <poll.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -118,7 +120,7 @@ int S_sendMessage (int sockfd, struct sockaddr *dist_addr,
         perror("sendto");
         return SOCK_SENDTO_FAILED;
     } else {
-        printf("Envoyé %d bytes\n", nbytes);
+//        printf("Envoyé %d bytes\n", nbytes);
     }
     return 0;
 }
@@ -161,8 +163,66 @@ char* compute_md5(FILE *file) {
         sprintf(result_str+(i*2), "%.2x", result[i]);
     result_str[32] = '\0';
     return result_str;
+}
 
-    
+int timeout_ack(int sockfd, long seconds) {
+    // 1 si des données ont été reçues, 0 sinon
+    struct pollfd fd;
+    int retval;
+
+    fd.fd = sockfd;
+    fd.events = POLLIN;
+
+    retval = poll(&fd, 1, seconds * 1000);
+
+    if (retval == -1)
+        perror("poll ");
+    else if (retval) {
+        return 1;
+    }
+
+    return 0;
+}
+
+int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
+                int nbytes, uint8_t seq) {
+    struct packet_header *header;
+    struct packet_header *ack_header = malloc(sizeof(struct packet_header));
+    int received_ack;
+    int nb_tries = 0;
+    int acked = 0;
+
+    header = (struct packet_header *) buffer;
+    header->seq = seq;
+    header->payload_size = nbytes;
+
+    while (!acked) {
+        if (S_sendMessage(sockfd, dist_addr, buffer,
+                          sizeof(*header) + header->payload_size) < 0)
+            exit(SOCK_SENDTO_FAILED);
+
+
+        received_ack = timeout_ack(sockfd, TIMEOUT); // on attend un ACK
+        
+        if (received_ack) {
+            if ((S_receiveMessage(sockfd, dist_addr, ack_header,
+                                  sizeof(struct packet_header)) < 0)) {
+                fprintf(stderr, "Lecture de l'ack a échouée\n");
+                exit(1);
+            }
+            
+            if (ack_header->seq == seq)
+                acked = 1;
+        }
+
+        // pas très propre, permet de quitter au bout d'un moment
+        // et de vérifier quand même le checksum du fichier
+        
+        nb_tries++;
+        if (nb_tries > NB_TRIES)
+            return 0;
+    }
+
+    return 1;
 
 }
-    

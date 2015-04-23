@@ -8,11 +8,10 @@
 #include <unistd.h>
 
 
-int send_ack(int sockfd, struct sockaddr *addr, uint32_t seq) {
+int send_ack(int sockfd, struct sockaddr *addr, uint8_t seq) {
     struct packet_header header;
     header.seq = seq;
     header.payload_size = 0;
-    printf("Envoi de ACK%d\n", seq);
     if (S_sendMessage(sockfd, addr, &header, sizeof(header)) < 0) {
         fprintf(stderr, "Erreur envoi de l'acquittement\n");
         return -1;
@@ -32,6 +31,7 @@ int main(int argc, char *argv[])
     int local_port;
     struct packet_header *header;
     int domain = AF_INET; // ipv4 ou ipv6
+    int i; // compteur de paquets reçus
 
     // gestion du fichier
     char *filename;
@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     
     // calcul de la somme md5
     char *md5sum;
+    struct packet_header *md5_header;
 
 
     // Parsing des arguments
@@ -90,14 +91,14 @@ int main(int argc, char *argv[])
             exit(SOCK_RECV_FAILED);
         
         header = (struct packet_header *) buffer;
-        printf("Reçu paquet : %d\n", header->seq);
         fwrite(buffer + sizeof(*header), header->payload_size, 1, file);
         
         if (send_ack(sockfd, &dist_addr, header->seq) < 0)
             exit(1);
+        i++;
     } while (header->payload_size == PAYLOAD_SIZE);
     
-    printf("%d paquets reçus\n", header->seq);
+    printf("%d paquets reçus\n", i -1);
     printf("Calcul du md5...\n");
     fclose(file);
     if ((file = fopen(filename, "r")) == NULL) {
@@ -105,10 +106,13 @@ int main(int argc, char *argv[])
     }
 
     md5sum = compute_md5(file);
-    printf("%s\n", md5sum);
+    printf("Somme MD5 du fichier reçu: %s\n", md5sum);
+    md5_header = (struct packet_header *) buffer;
+    send_packet(sockfd, &dist_addr, buffer, sizeof(*md5_header) + 33);
+    memcpy(buffer + sizeof(*md5_header), md5sum, 33);
 
-    S_sendMessage(sockfd, &dist_addr, (unsigned char *) md5sum,
-                  strlen(md5sum) * sizeof(unsigned char) + 1);
+    S_sendMessage(sockfd, &dist_addr, buffer,
+                  sizeof(*md5_header) + 33);
 
     return 0;
 }
