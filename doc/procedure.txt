@@ -15,13 +15,13 @@ transfert de fichier sur canal de fiabilité parfaite
 
 En ipv4 :
 
- $ ./receiver-udp 4 received_file
+ $ ./receiver-udp 4 received_file 30000
 
  $ ./sender-udp 4 resources/testfile-1024x512  127.0.0.1 30000
 
 En ipv6 : 
 
- $ ./receiver-udp 6 received_file
+ $ ./receiver-udp 6 received_file 30000
 
  $ ./sender-udp 6 resources/testfile-1024x512  ::1 30000
 
@@ -29,5 +29,20 @@ En ipv6 :
 transfert de fichier sur canal bruité, bit alterné
 --------------------------------------------------
 
+En ipv4 :
+
+ $ ./receiver-udp 4 received_file 30000
+
+ $ ./sender-udp 4 resources/testfile-1024x512  127.0.0.1 30000 20000
+
+En ipv6 : 
+
+ $ ./receiver-udp 6 received_file 30000
+
+ $ ./sender-udp 6 resources/testfile-1024x512  ::1 30000 20000
+
+
 transfert de fichier sur canal bruité, go back n
 ------------------------------------------------
+
+N/A
