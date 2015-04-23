@@ -1,0 +1,6 @@
+N'ayant pas implémenté GoBackN, je ne peux comparer les deux
+protocoles, mais je peux en tout cas affirmer que le protocole à bit
+alterné est *très* lent. Il nous faut un timeout suffisamment grand
+pour pallier aux lenteurs éventuelles du réseau, mais du coup en cas
+de pertes de paquets, le programme va passer l'essentiel de son temps
+à attendre le timeout...

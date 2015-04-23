@@ -1,0 +1,32 @@
+Canal parfait
+-------------
+
+La structure d'un datagramme est ainsi :
+
+   4 octets         2 octets                     <taille des données> (<= PAYLOAD_SIZE = 512 octets)
++--------------+----------------+--------------------------------------------------------------------------------+
+|  numero de   | taille des     |         Données                                                                |
+|  sequence    | données(octets)|                                                                                |
++--------------+----------------+--------------------------------------------------------------------------------+
+
+En bonus, quand le recepteur a reçu l'intégralité des données, il
+calcule la somme MD5 du fichier, et l'envoie en ASCII à
+l'émetteur. (Il aurait fallu utiliser la structure de donnée ci-dessus
+pour cela, mais j'ai manqué de temps. C'est corrigé dans l'exercice 4.)
+
+
+
+Bit alterné
+-----------
+ <--- 1 octet--->     2 octets                             <taille des donnéès> (<= PAYLOAD_SIZE = 512 octets)
+ +-------+-------+-----------------------+------------------------------------------------------------------------+
+ |   seq |   cmd |    taille des données | Données                                                                |
+ |       |       |                       |                                                                        |
+ +-------+-------+-----------------------+------------------------------------------------------------------------+
+
+cmd : 0 pour DATA (avec PAYLOAD contenant des morceaux de fichier)
+      1 pour CHECKSUM (avec PAYLOAD contenant une chaine represésentant la somme MD5 d'un fichier)
+
+seq : 0 ou 1
+
+taille des données 
