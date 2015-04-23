@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
     } while (header->payload_size == PAYLOAD_SIZE);
     
     printf("%d paquets reçus\n", i -1);
-    printf("Calcul du md5...\n");
     fclose(file);
     if ((file = fopen(filename, "r")) == NULL) {
         fprintf(stderr, "Impossible d'ouvrir '%s' en lecture", filename);

@@ -212,7 +212,7 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
                 exit(1);
             }
             
-            if (ack_header->seq == seq)
+            if (ack_header->seq == seq && ack_header->cmd == cmd)
                 acked = 1;
         }
 
