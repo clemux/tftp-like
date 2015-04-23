@@ -220,12 +220,14 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
         // et de vérifier quand même le checksum du fichier
         
         nb_tries++;
-        if (nb_tries > NB_TRIES)
+        if (nb_tries > NB_TRIES) {
+            fprintf(stderr, "Abandon après %d essais. Les données seront corrompues :(\n", NB_TRIES);
             return 0;
+        
+        }
     }
 
     return 1;
-
 }
 
 int send_ack(int sockfd, struct sockaddr *addr, uint8_t seq, uint8_t cmd) {
