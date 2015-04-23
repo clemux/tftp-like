@@ -113,6 +113,7 @@ int main(int argc, char* argv[])
 
     printf("%d paquets envoyés\n", i - 1);
     printf("Attente du md5...\n");
+    // on reçoit une chaine contenant un checksum md5, donc 33 octets ('\0' final compris)
     if ((S_receiveMessage(sockfd, dist_addr, buffer, sizeof(struct packet_header) + 33) < 0)) {
         fprintf(stderr, "Réception de la somme md5 échouée\n");
         exit(1);

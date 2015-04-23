@@ -221,7 +221,8 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
         
         nb_tries++;
         if (nb_tries > NB_TRIES) {
-            fprintf(stderr, "Abandon après %d essais. Les données seront corrompues :(\n", NB_TRIES);
+            fprintf(stderr, "Abandon après %d essais. Les données seront corrompues :(\n",
+                    NB_TRIES);
             return 0;
         
         }
