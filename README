@@ -1,3 +1,24 @@
 Fiabilisation et optimisation d’un canal de transmission
 --------------------------------------------------------
 
+Exercice 1, 2, 3 : 
+
+ $ cd canal_parfait/
+ 
+ $ make
+
+(Les warnings sont dûs à la bibliothèque j'ai utilisée pour calculer des sommes MD5)
+
+ $ ./sender-udp
+
+ $ ./receiver-udp
+
+
+Exercice 4:
+
+ $ cd bit_alterne
+
+ $ make
+
+ $ ./sender-udp # l'aide s'affiche
+ $ ./receiver-udp # l'aide s'affiche

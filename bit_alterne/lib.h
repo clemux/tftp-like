@@ -13,7 +13,7 @@
 #define INVALID_PORT_ERROR -32
 #define FILE_BUF_SIZE 4096 // for compute_md5
 
-#define TIMEOUT 20
+#define TIMEOUT 2
 #define NB_TRIES 20
 
 

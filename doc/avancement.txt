@@ -11,20 +11,10 @@ Exercice 2
 receiver
 --------
 
-TODO local port en paramètre
-TODO filename en paramètre
-TODO écrire le fichier dans filename
-
 OK : recevoir fichier et detecter fin de transmission
 
 sender
 ------
-
-TODO distant_host en paramètre
-TODO distant_port en parametre
-TODO local_port en paramètre
-
-DONE envoyer fichier par bloc de 512
 
 Exercice 3 : Migration vers IPv6
 ================================
@@ -36,7 +26,9 @@ continuant en supposant que l'adresse donnée est une adresse ipv4.
 Exercice 4 : Bit alterné
 ========================
 
-Ça fonctionne bien, en ipv6 autant qu'en ipv4.
+Ça semble fonctionner, en ipv4 comme en ipv6.
 
 Exercice 5 : Go Back N
 ======================
+
+Pas fait.
