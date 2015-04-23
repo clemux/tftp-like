@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 
     // somme md5 : 32 octets ASCII + '\0' de fin de chaine
     memcpy(md5sum_remote, buffer + sizeof(struct packet_header), 33);
-    printf("Somme MD5 distante : %s\n", buffer);
+    printf("Somme MD5 distante : %s\n", md5sum_remote);
 
     md5sum_local = compute_md5(file);
     printf("Somme MD5 locale : %s\n", md5sum_local);
