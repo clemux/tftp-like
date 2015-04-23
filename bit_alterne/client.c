@@ -30,6 +30,7 @@ int main(int argc, char* argv[])
     // calcul md5
     char *md5sum_local;
     char md5sum_remote[33];
+    struct packet_header *header; // pour la reception du md5 distant
 
     // boucle d'envoi du fichier
 
@@ -101,7 +102,7 @@ int main(int argc, char* argv[])
             fprintf(stderr, "Erreur de lecture: '%s'", filename);
             exit(FILE_READ_ERROR);
         }            
-        if (!send_packet(sockfd, dist_addr, buffer, nbytes, i % 2)) {
+        if (!send_packet(sockfd, dist_addr, buffer, nbytes, i % 2, 0)) {
             printf("Envoi du paquet %d échoué\n", i);
             break;
         }
@@ -114,6 +115,13 @@ int main(int argc, char* argv[])
     printf("Attente du md5...\n");
     if ((S_receiveMessage(sockfd, dist_addr, buffer, sizeof(struct packet_header) + 33) < 0)) {
         fprintf(stderr, "Réception de la somme md5 échouée\n");
+        exit(1);
+    }
+
+    header = (struct packet_header *) buffer;
+
+    if (send_ack(sockfd, dist_addr, header->seq, header->cmd) < 0) {
+        fprintf(stderr, "Impossible d'envoyer le ACK. Abandon.\n");
         exit(1);
     }
 

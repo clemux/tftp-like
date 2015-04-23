@@ -8,17 +8,6 @@
 #include <unistd.h>
 
 
-int send_ack(int sockfd, struct sockaddr *addr, uint8_t seq) {
-    struct packet_header header;
-    header.seq = seq;
-    header.payload_size = 0;
-    if (S_sendMessage(sockfd, addr, &header, sizeof(header)) < 0) {
-        fprintf(stderr, "Erreur envoi de l'acquittement\n");
-        return -1;
-    }
-    return 0;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -91,10 +80,18 @@ int main(int argc, char *argv[])
             exit(SOCK_RECV_FAILED);
         
         header = (struct packet_header *) buffer;
+        if (header->cmd != 0) {
+            fprintf(stderr, "Reçu une commande CHECKSUM avant la fin de la transmission. Abandon");
+            exit(1);
+        }
+
+        if (send_ack(sockfd, &dist_addr, header->seq, header->cmd) < 0) {
+            fprintf(stderr, "Impossible d'envoyer le ACK. Abandon.\n");
+            exit(1);
+        }
+
         fwrite(buffer + sizeof(*header), header->payload_size, 1, file);
         
-        if (send_ack(sockfd, &dist_addr, header->seq) < 0)
-            exit(1);
         i++;
     } while (header->payload_size == PAYLOAD_SIZE);
     
@@ -108,11 +105,11 @@ int main(int argc, char *argv[])
     md5sum = compute_md5(file);
     printf("Somme MD5 du fichier reçu: %s\n", md5sum);
     md5_header = (struct packet_header *) buffer;
-    send_packet(sockfd, &dist_addr, buffer, sizeof(*md5_header) + 33);
     memcpy(buffer + sizeof(*md5_header), md5sum, 33);
-
-    S_sendMessage(sockfd, &dist_addr, buffer,
-                  sizeof(*md5_header) + 33);
+    if (!send_packet(sockfd, &dist_addr, buffer, sizeof(*md5_header) + 33, 0, 1)) {
+        fprintf(stderr, "Pas reçu d'ACK pour le md5. Abandon.\n");
+        exit(1);
+    }
 
     return 0;
 }

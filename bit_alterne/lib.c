@@ -185,7 +185,7 @@ int timeout_ack(int sockfd, long seconds) {
 }
 
 int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
-                int nbytes, uint8_t seq) {
+                int nbytes, uint8_t seq, uint8_t cmd) {
     struct packet_header *header;
     struct packet_header *ack_header = malloc(sizeof(struct packet_header));
     int received_ack;
@@ -194,6 +194,7 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
 
     header = (struct packet_header *) buffer;
     header->seq = seq;
+    header->cmd = cmd;
     header->payload_size = nbytes;
 
     while (!acked) {
@@ -225,4 +226,16 @@ int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
 
     return 1;
 
+}
+
+int send_ack(int sockfd, struct sockaddr *addr, uint8_t seq, uint8_t cmd) {
+    struct packet_header header;
+    header.seq = seq;
+    header.cmd = cmd;
+    header.payload_size = 0;
+    if (S_sendMessage(sockfd, addr, &header, sizeof(header)) < 0) {
+        fprintf(stderr, "Erreur envoi de l'acquittement\n");
+        return -1;
+    }
+    return 0;
 }

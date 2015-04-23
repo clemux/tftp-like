@@ -36,7 +36,9 @@ int string2port(char* s);
 char* compute_md5(FILE *file);
 
 int timeout_ack(int sockfd, long seconds);
-int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer, int nbytes, uint8_t seq);
+int send_packet(int sockfd, struct sockaddr *dist_addr, void *buffer,
+                int nbytes, uint8_t seq, uint8_t cmd);
+int send_ack(int sockfd, struct sockaddr *addr, uint8_t seq, uint8_t cmd);
 
 
 
